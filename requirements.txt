@@ -1,0 +1,5 @@
+conda install kivy -c conda-forge
+pip install pywin32
+#pip install win32gui
+python -m pip install KivyOnTop
+pip install inputs
