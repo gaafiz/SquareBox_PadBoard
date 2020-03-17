@@ -3,3 +3,5 @@ pip install pywin32
 #pip install win32gui
 python -m pip install KivyOnTop
 pip install inputs
+
+# USE http://ds4windows.com/ for ds4 compatibility
