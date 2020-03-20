@@ -75,6 +75,9 @@ class myApp(App):
     boxes_of_letters = ListProperty(default_letters)
     active_box = NumericProperty(-1)
 
+    yVel = 0
+    xVel = 0
+
     def on_start(self, *args):
         TITLE = 'Danzeff OSK Remake'
         Window.set_title(TITLE)
@@ -91,6 +94,7 @@ class myApp(App):
         TRIGGER_THRESHOLD = 10
         y_axis = 'CENTER'
         x_axis = 'CENTER'
+        velocity_constant = 15
 
         is_L2_pressed = False
         is_R2_pressed = False
@@ -134,50 +138,71 @@ class myApp(App):
                 elif event.code == 'BTN_TL' and event.state == 0:
                     self.boxes_of_letters = self.low
 
-                elif event.code == 'ABS_Y':
-                    y_val = event.state / STICK_MAX
-                    if y_val > THRESHOLD:
-                        y_axis = 'TOP'
-                    elif y_val < -THRESHOLD:
-                        y_axis = 'BOTTOM'
-                    else:
-                        y_axis = 'CENTER'
+                elif event.code == 'ABS_Y' or event.code == 'ABS_X':
+                    if event.code == 'ABS_Y':
+                        y_val = event.state / STICK_MAX
+                        if y_val > THRESHOLD:
+                            y_axis = 'TOP'
+                        elif y_val < -THRESHOLD:
+                            y_axis = 'BOTTOM'
+                        else:
+                            y_axis = 'CENTER'
 
-                elif event.code == 'ABS_X':
-                    x_val = event.state / STICK_MAX
-                    if x_val > THRESHOLD:
-                        x_axis = 'RIGHT'
-                    elif x_val < -THRESHOLD:
-                        x_axis = 'LEFT'
-                    else:
-                        x_axis = 'CENTER'
+                    elif event.code == 'ABS_X':
+                        x_val = event.state / STICK_MAX
+                        if x_val > THRESHOLD:
+                            x_axis = 'RIGHT'
+                        elif x_val < -THRESHOLD:
+                            x_axis = 'LEFT'
+                        else:
+                            x_axis = 'CENTER'
 
-                if y_axis == 'TOP':
-                    if x_axis == 'LEFT':
-                        self.active_box = 0
-                    elif x_axis == 'RIGHT':
-                        self.active_box = 2
+                    if y_axis == 'TOP':
+                        if x_axis == 'LEFT':
+                            self.active_box = 0
+                        elif x_axis == 'RIGHT':
+                            self.active_box = 2
+                        else:
+                            self.active_box = 1
+                    elif y_axis == 'BOTTOM':
+                        if x_axis == 'LEFT':
+                            self.active_box = 6
+                        elif x_axis == 'RIGHT':
+                            self.active_box = 8
+                        else:
+                            self.active_box = 7
                     else:
-                        self.active_box = 1
-                elif y_axis == 'BOTTOM':
-                    if x_axis == 'LEFT':
-                        self.active_box = 6
-                    elif x_axis == 'RIGHT':
-                        self.active_box = 8
+                        if x_axis == 'LEFT':
+                            self.active_box = 3
+                        elif x_axis == 'RIGHT':
+                            self.active_box = 5
+                        else:
+                            self.active_box = 4
+
+                elif event.code == 'ABS_RY':
+                    value = event.state / STICK_MAX
+                    if value > THRESHOLD or value < -THRESHOLD:
+                        self.yVel = - int(velocity_constant * value)
                     else:
-                        self.active_box = 7
-                else:
-                    if x_axis == 'LEFT':
-                        self.active_box = 3
-                    elif x_axis == 'RIGHT':
-                        self.active_box = 5
+                        self.yVel = 0
+                elif event.code == 'ABS_RX':
+                    value = event.state / STICK_MAX
+                    if value > THRESHOLD or value < -THRESHOLD:
+                        self.xVel = int(velocity_constant * value)
                     else:
-                        self.active_box = 4
+                        self.xVel = 0
+
 
     def init_input_listening_thread(self):
         self._monitor_thread = threading.Thread(target=self.input_loop, args=())
         self._monitor_thread.daemon = True
         self._monitor_thread.start()
+
+    def update_positions(self, dummy):
+        if self.yVel != 0:
+            Window.top += self.yVel
+        if self.xVel != 0:
+            Window.left += self.xVel
 
     def build(self):
         self.low = default_letters
@@ -186,6 +211,8 @@ class myApp(App):
         self.root_widget = BoxLayout()
         self.render_keyboard_layout(self.root_widget, self.boxes_of_letters)
         self.active_box = 4
+
+        Clock.schedule_interval(self.update_positions, 0.01)
 
         self.init_input_listening_thread()
         return self.root_widget
@@ -215,7 +242,7 @@ class myApp(App):
             letter_count = 0
             for letter in each_letter_box:
                 letters_grid_layout.add_widget(Label(text=''))
-                save_lbl = Label(text='[b]' + letter + '[/b]', markup=True, font_size='20sp')
+                save_lbl = Label(text='[b]' + letter + '[/b]', markup=True, font_size='22sp')
                 self.register_letter_label(save_lbl, boxes_count, letter_count)
                 letters_grid_layout.add_widget(save_lbl)
                 letter_count += 1
