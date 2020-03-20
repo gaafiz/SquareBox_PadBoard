@@ -11,4 +11,6 @@ pip install pywin32
 pip install inputs
 pip install keyboard
 
+pip install --upgrade setuptools==44.0.0
+
 # USE http://ds4windows.com/ for ds4 compatibility
