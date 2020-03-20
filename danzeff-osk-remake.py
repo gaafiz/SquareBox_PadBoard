@@ -35,6 +35,7 @@ from widget.myboxlayout import MyBoxLayout
 import gamepad_high_cpu_usage_patch
 
 Window.fullscreen = False
+Window.borderless = True
 Window.size = (300, 280)
 
 default_letters = [
@@ -62,11 +63,12 @@ caps_letters = [
 ]
 
 class myApp(App):
+    is_in_pause = False
     boxes_of_letters = ListProperty(default_letters)
     active_box = NumericProperty(-1)
 
     def on_start(self, *args):
-        TITLE = 'WhatAKeyboard'
+        TITLE = 'Danzeff OSK Remake'
         Window.set_title(TITLE)
         register_topmost(Window, TITLE)
         #keyboard.on_press_key('t', call2 )
@@ -74,25 +76,39 @@ class myApp(App):
     def input_loop(self):
         STICK_MAX = math.pow(2, 15)
         THRESHOLD = 0.33
+        TRIGGER_THRESHOLD = 10
         y_axis = 'CENTER'
         x_axis = 'CENTER'
+
+        is_L2_pressed = False
+        is_R2_pressed = False
 
         while True:
             events = get_gamepad()
             for event in events:
-                if event.code == 'BTN_NORTH' and event.state == 0:
+                if event.code == 'ABS_Z':
+                    is_L2_pressed = event.state > TRIGGER_THRESHOLD
+                elif event.code == 'ABS_RZ':
+                    is_R2_pressed = event.state > TRIGGER_THRESHOLD
+                elif event.code == 'BTN_SELECT' and event.state == 1:
+                    if is_L2_pressed and is_R2_pressed:
+                        self.is_in_pause = not self.is_in_pause
+                elif self.is_in_pause:
+                    continue
+
+                elif event.code == 'BTN_NORTH' and event.state == 1:
                     letter = self.boxes_of_letters[self.active_box][0]
                     if letter == 'del':
                         keyboard.press_and_release('backspace')
                     else:
                         keyboard.write(letter)
-                elif event.code == 'BTN_WEST'and event.state == 0:
+                elif event.code == 'BTN_WEST'and event.state == 1:
                     letter = self.boxes_of_letters[self.active_box][1]
                     keyboard.write(letter)
-                elif event.code == 'BTN_EAST' and event.state == 0:
+                elif event.code == 'BTN_EAST' and event.state == 1:
                     letter = self.boxes_of_letters[self.active_box][2]
                     keyboard.write(letter)
-                elif event.code == 'BTN_SOUTH' and event.state == 0:
+                elif event.code == 'BTN_SOUTH' and event.state == 1:
                     letter = self.boxes_of_letters[self.active_box][3]
                     if letter == 'enter':
                         keyboard.press_and_release('enter')
