@@ -1,3 +1,8 @@
+from kivy.config import Config
+#Config.read('kivy-conf.ini')
+# set config
+#Config.write()
+
 # Std libs
 import math
 import time
@@ -5,6 +10,10 @@ import threading
 
 
 # Kivy - Graphic
+import win32gui
+import win32con
+import win32api
+
 import kivy
 from kivy.app import App
 from kivy.core.window import Window
@@ -15,7 +24,6 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
-from kivy.config import Config
 from kivy.properties import ListProperty
 from kivy.properties import NumericProperty
 
@@ -72,6 +80,10 @@ class myApp(App):
         Window.set_title(TITLE)
         register_topmost(Window, TITLE)
         #keyboard.on_press_key('t', call2 )
+
+        self.handle = win32gui.FindWindow(None, TITLE)
+        win32gui.SetWindowLong(self.handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(self.handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
+        win32gui.SetLayeredWindowAttributes(self.handle, win32api.RGB(0, 0, 0), 210, win32con.LWA_ALPHA)
 
     def input_loop(self):
         STICK_MAX = math.pow(2, 15)
