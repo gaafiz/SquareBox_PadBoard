@@ -1,7 +1,14 @@
-conda install kivy -c conda-forge
-pip install pywin32
-#pip install win32gui
+# conda install kivy -c conda-forge
+
+python -m pip install docutils pygments pypiwin32 kivy_deps.sdl2==0.1.* kivy_deps.glew==0.1.*
+python -m pip install kivy_deps.gstreamer==0.1.*
+python -m pip install kivy==1.11.1
+
 python -m pip install KivyOnTop
+#pip install win32gui
+pip install pywin32
+
 pip install inputs
+pip install keyboard
 
 # USE http://ds4windows.com/ for ds4 compatibility
