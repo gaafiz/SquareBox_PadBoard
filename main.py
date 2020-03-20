@@ -16,6 +16,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 from kivy.config import Config
+from kivy.properties import ListProperty
+from kivy.properties import NumericProperty
+
 # Kivy - Addons
 from KivyOnTop import register_topmost
 
@@ -28,45 +31,11 @@ from inputs import XinputGamepad
 from inputs import iter_unpack
 
 # custom libs
+from widget.myboxlayout import MyBoxLayout
 import gamepad_high_cpu_usage_patch
 
 Window.fullscreen = False
 Window.size = (300, 280)
-
-Builder.load_string('''
-<MyBoxLayout>
-    canvas.before:
-        Color:
-            rgba: .5, .5, .5, 1
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-
-<TargetBoxLayout>
-    canvas.before:
-        Color:
-            rgba: 1, 0.6, 0.1, 1
-        Rectangle:
-            pos: self.pos
-            size: self.size
-        Color:
-            rgba: .5, .5, .5, 1
-        Line:
-            width: 2
-            rectangle: self.x, self.y, self.width, self.height
-''')
-
-# This class stores the info of .kv file
-# when it is called goes to my.kv file
-class MainWidget(GridLayout):
-    pass
-
-class MyBoxLayout(BoxLayout):
-    pass
-
-class TargetBoxLayout(BoxLayout):
-    pass
-
 
 default_letters = [
     [',','a','c','b'],
@@ -93,6 +62,9 @@ caps_letters = [
 ]
 
 class myApp(App):
+    boxes_of_letters = ListProperty(default_letters)
+    active_box = NumericProperty(-1)
+
     def on_start(self, *args):
         TITLE = 'WhatAKeyboard'
         Window.set_title(TITLE)
@@ -101,7 +73,7 @@ class myApp(App):
 
     def input_loop(self):
         STICK_MAX = math.pow(2, 15)
-        THRESHOLD = 0.1
+        THRESHOLD = 0.33
         y_axis = 'CENTER'
         x_axis = 'CENTER'
 
@@ -174,33 +146,37 @@ class myApp(App):
                     else:
                         self.active_box = 4
 
+    def init_input_listening_thread(self):
+        self._monitor_thread = threading.Thread(target=self.input_loop, args=())
+        self._monitor_thread.daemon = True
+        self._monitor_thread.start()
 
     def build(self):
         self.low = default_letters
         self.upp = caps_letters
 
-        self.active_box = 4
-        self.boxes_of_letters = default_letters
         self.root_widget = BoxLayout()
+        self.render_keyboard_layout(self.root_widget, self.boxes_of_letters)
+        self.active_box = 4
 
-        self.render_keyboard_layout(self.root_widget, self.boxes_of_letters, self.active_box)
-
-        self._monitor_thread = threading.Thread(target=self.input_loop, args=())
-        self._monitor_thread.daemon = True
-        self._monitor_thread.start()
-
-
-        #Clock.schedule_interval(self.update, 1.0/40.0)
-
+        self.init_input_listening_thread()
         return self.root_widget
 
-    def update(self, dt):
-        abc =str(self.active_box)
-        self.render_keyboard_layout(self.root_widget, self.boxes_of_letters, self.active_box)
-        pass
+    def register_letter_label(self, label, box_idx, letter_idx):
+        def update_letter(instance, value):
+            label.text = '[b]' + self.boxes_of_letters[box_idx][letter_idx] + '[/b]'
+        self.bind(boxes_of_letters=update_letter)
 
+    def register_letter_box(self, box, idx):
+        def target_box(instance, new_active_box):
+            if new_active_box == idx:
+                box.target_it()
+            else:
+                box.untarget_it()
 
-    def render_keyboard_layout(self, root_layout, boxes_of_letters, targeted_box):
+        self.bind(active_box=target_box)
+
+    def render_keyboard_layout(self, root_layout, boxes_of_letters):
         keyboard_grid_layout = GridLayout(cols=3, row_default_height=60)
 
         boxes_count = 0
@@ -208,16 +184,17 @@ class myApp(App):
             letters_grid_layout = GridLayout(cols=3, row_default_height=20)
 
             # Write letters in a box
+            letter_count = 0
             for letter in each_letter_box:
                 letters_grid_layout.add_widget(Label(text=''))
-                letters_grid_layout.add_widget(Label(text='[b]' + letter + '[/b]', markup=True, font_size='20sp'))
+                save_lbl = Label(text='[b]' + letter + '[/b]', markup=True, font_size='20sp')
+                self.register_letter_label(save_lbl, boxes_count, letter_count)
+                letters_grid_layout.add_widget(save_lbl)
+                letter_count += 1
             letters_grid_layout.add_widget(Label(text=''))
 
-            if boxes_count == targeted_box:
-                wrapper_box_layout = TargetBoxLayout()
-            else:
-                wrapper_box_layout = MyBoxLayout()
-
+            wrapper_box_layout = MyBoxLayout()
+            self.register_letter_box(wrapper_box_layout, boxes_count)
             wrapper_box_layout.add_widget(letters_grid_layout)
             keyboard_grid_layout.add_widget(wrapper_box_layout)
 
