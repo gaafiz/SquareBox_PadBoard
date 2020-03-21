@@ -9,11 +9,6 @@ import time
 import threading
 
 
-# Kivy - Graphic
-import win32gui
-import win32con
-import win32api
-
 import kivy
 from kivy.app import App
 from kivy.core.window import Window
@@ -28,7 +23,6 @@ from kivy.properties import ListProperty
 from kivy.properties import NumericProperty
 
 # Kivy - Addons
-from KivyOnTop import register_topmost
 
 # Input libraries
 import keyboard
@@ -41,34 +35,13 @@ from inputs import iter_unpack
 # custom libs
 from widget.myboxlayout import MyBoxLayout
 import gamepad_high_cpu_usage_patch
+import squarebox_gamepad_config as app_config
+import system_window_util as window_util
 
-Window.fullscreen = False
-Window.borderless = True
-Window.size = (300, 280)
 
-default_letters = [
-    [',','a','c','b'],
-    ["'",'d', 'f', 'e'],
-    ['!', "g", 'i', 'h'],
-    ['-', 'j', 'l', 'k'],
-    ['del', 'm', 'n', 'space'],
-    ['?', 'o', 'q', 'p'],
-    ['(', 'r', 't', 's'],
-    [':', 'u', 'w', 'v'],
-    [')', 'x', 'z', 'y']
-]
+default_letters = app_config.tiles[0].foreground_grill
+caps_letters = app_config.tiles[0].background_grill
 
-caps_letters = [
-    [',','A','C','B'],
-    ["'",'D', 'F', 'E'],
-    ['!', "G", 'I', 'H'],
-    ['-', 'J', 'L', 'K'],
-    ['del', 'M', 'N', 'space'],
-    ['?', 'O', 'Q', 'P'],
-    ['(', 'R', 'T', 'S'],
-    [':', 'U', 'W', 'V'],
-    [')', 'X', 'Z', 'Y']
-]
 
 class myApp(App):
     is_in_pause = False
@@ -79,14 +52,10 @@ class myApp(App):
     is_hide = False
 
     def on_start(self, *args):
-        TITLE = 'Danzeff OSK Remake'
-        Window.set_title(TITLE)
-        register_topmost(Window, TITLE)
-        #keyboard.on_press_key('t', call2 )
+        #window_util.set_always_upront(app_config.title)
+        #window_util.set_transparency(app_config.title, app_config.transparency_level)
+        pass
 
-        self.handle = win32gui.FindWindow(None, TITLE)
-        win32gui.SetWindowLong(self.handle, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(self.handle, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
-        win32gui.SetLayeredWindowAttributes(self.handle, win32api.RGB(0, 0, 0), 210, win32con.LWA_ALPHA)
 
     def input_loop(self):
         STICK_MAX = math.pow(2, 15)
