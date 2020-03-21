@@ -35,8 +35,8 @@ from inputs import iter_unpack
 # custom libs
 from widget.myboxlayout import MyBoxLayout
 import gamepad_high_cpu_usage_patch
-import squarebox_gamepad_config as app_config
 import system_window_util as window_util
+import squarebox_gamepad_config as app_config
 
 
 default_letters = app_config.tiles[0].foreground_grill
@@ -44,6 +44,7 @@ caps_letters = app_config.tiles[0].background_grill
 
 
 class myApp(App):
+    title = app_config.title
     is_in_pause = False
     boxes_of_letters = ListProperty(default_letters)
     active_box = NumericProperty(-1)
@@ -52,8 +53,8 @@ class myApp(App):
     is_hide = False
 
     def on_start(self, *args):
-        #window_util.set_always_upront(app_config.title)
-        #window_util.set_transparency(app_config.title, app_config.transparency_level)
+        window_util.set_always_upront(app_config.title)
+        window_util.set_transparency(app_config.title, app_config.transparency_level)
         pass
 
 

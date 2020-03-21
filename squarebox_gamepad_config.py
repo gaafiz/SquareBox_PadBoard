@@ -36,4 +36,3 @@ from kivy.core.window import Window
 Window.fullscreen = False
 Window.borderless = True
 Window.size = (300, 280)
-Window.set_title(title)
