@@ -5,6 +5,10 @@ from kivy.uix.button import Button
 from kivy.graphics import Color, Ellipse, Line
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
+from kivy.clock import Clock
+from kivy.core.window import Window
+
+
 
 from kivy.event import EventDispatcher
 from kivy.lang import Builder
@@ -39,18 +43,23 @@ class MyPaintApp(App):
 
         parent = MyBoxLayout()
         self.painter = MyPaintWidget()
-        clearbtn = Button(text=prop_class.dynamic_text)
+        clearbtn = Button(text='hide')
         #clearbtn.bind(on_release=parent.update_color)
         parent.add_widget(self.painter)
         parent.add_widget(clearbtn)
 
-        def update(instance, value):
-            clearbtn.text = 'ok'
+        def show(dummy):
+            Window.show()
+
+        def update(instance):
+            print(Window.is_hide)
+            #self.root.get_root_window().hide()
+            Window.hide()
             #value
+            Clock.schedule_once(show, 5)
             pass
-        # prop_class.bind(dynamic_text=clearbtn.setter('text'))
-        prop_class.bind(dynamic_text=update)
-        prop_class.dynamic_text = "ciapo"
+        #prop_class.bind(dynamic_text=clearbtn.setter('text'))
+        clearbtn.bind(on_release=update)
 
         return parent
 

@@ -74,9 +74,9 @@ class myApp(App):
     is_in_pause = False
     boxes_of_letters = ListProperty(default_letters)
     active_box = NumericProperty(-1)
-
     yVel = 0
     xVel = 0
+    is_hide = False
 
     def on_start(self, *args):
         TITLE = 'Danzeff OSK Remake'
@@ -203,6 +203,14 @@ class myApp(App):
             Window.top += self.yVel
         if self.xVel != 0:
             Window.left += self.xVel
+
+        if self.is_in_pause != self.is_hide:
+            if self.is_in_pause:
+                Window.hide()
+            else:
+                Window.show()
+            self.is_hide = not self.is_hide
+
 
     def build(self):
         self.low = default_letters
