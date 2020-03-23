@@ -54,6 +54,9 @@ class myApp(App):
     xVel = 0
     is_hide = False
 
+    low = default_letters
+    upp = caps_letters
+
     def on_start(self, *args):
         window_util.set_always_upront(app_config.title)
         window_util.set_transparency(app_config.title, app_config.transparency_level)
@@ -165,38 +168,44 @@ class myApp(App):
                         self.xVel = 0
 
 
+    def build(self):
+        # Build Keyboard layout and set 'Center Box" as the active one
+        self.root_widget = self.build_keyboard_layout(self.boxes_of_letters)
+        self.active_box = 4
+
+        # Start rendering and input listening loops
+        Clock.schedule_interval(self.update_window, 0.01)
+        self.init_input_listening_thread()
+
+        return self.root_widget
+
     def init_input_listening_thread(self):
         self._monitor_thread = threading.Thread(target=self.input_loop, args=())
         self._monitor_thread.daemon = True
         self._monitor_thread.start()
 
-    def update_positions(self, dummy):
+    def update_window(self, dt):
+        """
+            This method updates some graphic properties of the windows.
+            I could set this changes using bindings but some windows
+            properties can only be touched from the main Thread.
+            All the sensitive updates to be done in the main Thread
+            are collected within this method
+        """
+
+        # Window moving logic
         if self.yVel != 0:
             Window.top += self.yVel
         if self.xVel != 0:
             Window.left += self.xVel
 
+        # Window hiding/showing logic
         if self.is_in_pause != self.is_hide:
             if self.is_in_pause:
                 Window.hide()
             else:
                 Window.show()
             self.is_hide = not self.is_hide
-
-
-    def build(self):
-        self.low = default_letters
-        self.upp = caps_letters
-
-        self.root_widget = self.build_keyboard_layout(self.boxes_of_letters)
-        self.active_box = 4
-
-        # Start rendering and input listening loops
-        Clock.schedule_interval(self.update_positions, 0.01)
-        self.init_input_listening_thread()
-
-        return self.root_widget
-
 
     def build_keyboard_layout(self, active_action_grid):
         keyboard_layout = GridLayout(cols=3, row_default_height=60)
