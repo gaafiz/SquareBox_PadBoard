@@ -21,6 +21,9 @@ from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 from kivy.properties import ListProperty
 from kivy.properties import NumericProperty
+from kivy.utils import escape_markup
+from kivy.lang import Builder
+
 
 # Kivy - Addons
 
@@ -33,7 +36,7 @@ from inputs import XinputGamepad
 from inputs import iter_unpack
 
 # custom libs
-from widget.myboxlayout import MyBoxLayout
+from widget import ActionsGridLayout
 import gamepad_high_cpu_usage_patch
 import system_window_util as window_util
 import squarebox_gamepad_config as app_config
@@ -41,7 +44,6 @@ import squarebox_gamepad_config as app_config
 
 default_letters = app_config.tiles[0].foreground_grill
 caps_letters = app_config.tiles[0].background_grill
-
 
 class myApp(App):
     title = app_config.title
@@ -186,55 +188,41 @@ class myApp(App):
         self.low = default_letters
         self.upp = caps_letters
 
-        self.root_widget = BoxLayout()
-        self.render_keyboard_layout(self.root_widget, self.boxes_of_letters)
+        self.root_widget = self.build_keyboard_layout(self.boxes_of_letters)
         self.active_box = 4
 
+        # Start rendering and input listening loops
         Clock.schedule_interval(self.update_positions, 0.01)
-
         self.init_input_listening_thread()
+
         return self.root_widget
 
-    def register_letter_label(self, label, box_idx, letter_idx):
-        def update_letter(instance, value):
-            label.text = '[b]' + self.boxes_of_letters[box_idx][letter_idx] + '[/b]'
-        self.bind(boxes_of_letters=update_letter)
 
-    def register_letter_box(self, box, idx):
+    def build_keyboard_layout(self, active_action_grid):
+        keyboard_layout = GridLayout(cols=3, row_default_height=60)
+
+        for action_box_id, each_action_box in enumerate(active_action_grid):
+            label_updater = self.label_updater_for_box(action_box_id)
+            action_box_layout = ActionsGridLayout(each_action_box, label_updater, row_default_height=20)
+            keyboard_layout.add_widget(action_box_layout)
+            self.active_box_updater(action_box_layout, action_box_id)
+
+        return keyboard_layout
+
+    def active_box_updater(self, box, idx):
         def target_box(instance, new_active_box):
             if new_active_box == idx:
                 box.target_it()
             else:
                 box.untarget_it()
-
         self.bind(active_box=target_box)
 
-    def render_keyboard_layout(self, root_layout, boxes_of_letters):
-        keyboard_grid_layout = GridLayout(cols=3, row_default_height=60)
-
-        boxes_count = 0
-        for each_letter_box in boxes_of_letters:
-            letters_grid_layout = GridLayout(cols=3, row_default_height=20)
-
-            # Write letters in a box
-            letter_count = 0
-            for letter in each_letter_box:
-                letters_grid_layout.add_widget(Label(text=''))
-                save_lbl = Label(text='[b]' + letter + '[/b]', markup=True, font_size='22sp')
-                self.register_letter_label(save_lbl, boxes_count, letter_count)
-                letters_grid_layout.add_widget(save_lbl)
-                letter_count += 1
-            letters_grid_layout.add_widget(Label(text=''))
-
-            wrapper_box_layout = MyBoxLayout()
-            self.register_letter_box(wrapper_box_layout, boxes_count)
-            wrapper_box_layout.add_widget(letters_grid_layout)
-            keyboard_grid_layout.add_widget(wrapper_box_layout)
-
-            boxes_count = boxes_count + 1
-
-        root_layout.clear_widgets()
-        root_layout.add_widget(keyboard_grid_layout)
+    def label_updater_for_box(self, box_idx):
+        def label_updater(label, action_idx):
+            def update_label_text(instance, value):
+                #label.set_text_with_default_style(value[box_idx][action_idx])
+                pass
+            self.bind(boxes_of_letters=update_label_text)
 
 
 

@@ -7,6 +7,7 @@ from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
 
 
 
@@ -18,7 +19,7 @@ current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfra
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from widget.myboxlayout import MyBoxLayout
+
 
 class MyPaintWidget(Widget):
 
@@ -41,7 +42,7 @@ class MyPaintApp(App):
     def build(self):
         prop_class = MyClass()
 
-        parent = MyBoxLayout()
+        parent = BoxLayout()
         self.painter = MyPaintWidget()
         clearbtn = Button(text='hide')
         #clearbtn.bind(on_release=parent.update_color)
