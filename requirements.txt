@@ -10,6 +10,7 @@ pip install pywin32
 
 pip install inputs
 pip install keyboard
+pip install mouse
 
 pip install --upgrade setuptools==44.0.0
 

@@ -47,7 +47,7 @@ class ActionsGridLayout(GridLayout):
         for action_idx, action in enumerate(actions):
             self.add_widget(Label())
             action_label = Label(text=action)
-            #label_updater(action_label, )
+            label_updater(action_label, action_idx)
             self.add_widget(action_label)
         self.add_widget(Label())
 
