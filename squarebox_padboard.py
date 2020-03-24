@@ -1,6 +1,7 @@
 # Std libs
 import math
 import time
+from time import time as now
 import threading
 
 # Kivy
@@ -33,6 +34,10 @@ class myApp(App):
     is_hide = False
     is_mouse_mode = False
 
+    # In seconds
+    hold_button_delay = 0.4
+    rapid_fired_frequency = 0.05
+
     # What is active on the padboard
     current_padboard_tile = 0
     current_padboard_grill = ListProperty(tiles[current_padboard_tile].foreground_grill)
@@ -43,8 +48,20 @@ class myApp(App):
     MouseYPosVelocity = 0
     MouseXPosVelocity = 0
 
-    # Special key
+    # Special keys
     is_L1_pressed = False
+
+    is_pressed = {
+        'DOWN': (False, None),
+        'UP': (False, None),
+        'LEFT': (False, None),
+        'RIGHT': (False, None),
+
+        # 'BTN_NORTH': False,
+        # 'BTN_SOUTH': False,
+        # 'BTN_EAST': False,
+        # 'BTN_WEST': False,
+    }
 
     def on_start(self, *args):
         window_util.set_always_upront(app_config.title)
@@ -66,6 +83,45 @@ class myApp(App):
                 else:
                     keyboard.write(action)
 
+    def release_key_if_pressed(self, key):
+        if keyboard.is_pressed(key):
+            keyboard.release(key)
+
+    def release_mouse_if_pressed(self, button):
+        if mouse.is_pressed(button=button):
+            mouse.release(button=button)
+
+    def handle_held_button_repetition(self):
+        while True:
+            tick_time = now()
+
+            on_hold = lambda: None if self.is_mouse_mode else keyboard.press('left')
+            on_release = lambda: self.release_mouse_if_pressed('left') if self.is_mouse_mode else self.release_key_if_pressed('left')
+            self.held_button_action(tick_time, "LEFT", on_hold, on_release)
+
+            on_hold = lambda: mouse.press(button='right') if self.is_mouse_mode else keyboard.press('right')
+            on_release = lambda: self.release_mouse_if_pressed('right') if self.is_mouse_mode else self.release_key_if_pressed('right')
+            self.held_button_action(tick_time, "RIGHT", on_hold, on_release)
+
+            on_hold = lambda: mouse.wheel(delta=1) if self.is_mouse_mode else keyboard.press('up')
+            on_release = lambda: None if self.is_mouse_mode else self.release_key_if_pressed('up')
+            self.held_button_action(tick_time, "UP", on_hold, on_release)
+
+            on_hold = lambda: mouse.wheel(delta=-1) if self.is_mouse_mode else keyboard.press('down')
+            on_release = lambda: None if self.is_mouse_mode else self.release_key_if_pressed('down')
+            self.held_button_action(tick_time, "DOWN", on_hold, on_release)
+
+            time.sleep(self.rapid_fired_frequency)
+
+    def held_button_action(self, tick_time, code, on_hold, on_release):
+        pressed, pressed_time = self.is_pressed[code]
+        if pressed:
+            if (tick_time - pressed_time) > self.hold_button_delay:
+                on_hold()
+        else:
+            on_release()
+
+
     def input_loop(self):
         ANALOG_STICK_MAX_RAW_VALUE = math.pow(2, 15)
         ANALOG_STICK_DEADZONE_THRESHOLD = 0.33
@@ -82,8 +138,19 @@ class myApp(App):
         is_START_pressed = False
         is_SELECT_pressed = False
 
-        is_down_pressed = False
-        is_up_pressed = False
+        def reset_mouse_mode_sensitive_buttons():
+            self.is_pressed['UP']= (False, None)
+            self.is_pressed['DOWN']= (False, None)
+            self.is_pressed['LEFT'] = (False, None)
+            self.is_pressed['RIGHT'] = (False, None)
+            self.release_key_if_pressed('up')
+            self.release_key_if_pressed('down')
+            self.release_key_if_pressed('left')
+            self.release_key_if_pressed('right')
+            self.release_mouse_if_pressed('left')
+            self.release_mouse_if_pressed('right')
+
+        self.init_input_held_buttons_handling()
 
         while True:
             events = get_gamepad()
@@ -215,19 +282,36 @@ class myApp(App):
                 # Handle Arrows
                 elif event.code == 'ABS_HAT0Y' and not self.is_mouse_mode:
                     if event.state == 1: # DOWN ARROW
-                        keyboard.press_and_release("down")
+                        keyboard.press("down")
+                        self.is_pressed['DOWN'] = (True, now())
                     elif event.state == -1: # UP ARROW
-                        keyboard.press_and_release("up")
+                        keyboard.press("up")
+                        self.is_pressed['UP'] = (True, now())
+                    else:
+                        self.is_pressed['UP']= (False, None)
+                        self.is_pressed['DOWN']= (False, None)
+                        self.release_key_if_pressed('up')
+                        self.release_key_if_pressed('down')
 
                 elif event.code == 'ABS_HAT0X' and not self.is_mouse_mode:
                     if event.state == -1: # LEFT ARROW
-                        keyboard.press_and_release("left")
+                        keyboard.press("left")
+                        self.is_pressed['LEFT'] = (True, now())
                     elif event.state == 1: # RIGHT ARROW
-                        keyboard.press_and_release("right")
+                        keyboard.press("right")
+                        self.is_pressed['RIGHT'] = (True, now())
+                        pass
+                    else:
+                        self.is_pressed['LEFT']= (False, None)
+                        self.is_pressed['RIGHT']= (False, None)
+                        self.release_key_if_pressed('left')
+                        self.release_key_if_pressed('right')
 
                 # Handle Mouse mode
                 elif event.code == 'BTN_THUMBR':
                     if event.state == 1:
+                        reset_mouse_mode_sensitive_buttons()
+
                         self.is_mouse_mode = not self.is_mouse_mode
                         if self.is_mouse_mode:
                             print("MOUSE MODE ON")
@@ -238,18 +322,26 @@ class myApp(App):
                 elif event.code == 'ABS_HAT0Y' and self.is_mouse_mode:
                     if event.state == 1: # DOWN ARROW
                        mouse.wheel(delta=-1)
+                       self.is_pressed['DOWN'] = (True, now())
                     elif event.state == -1: # UP ARROW
                         mouse.wheel(delta=1)
+                        self.is_pressed['UP'] = (True, now())
+                    else:
+                        self.is_pressed['UP']= (False, None)
+                        self.is_pressed['DOWN']= (False, None)
                 elif event.code == 'ABS_HAT0X' and self.is_mouse_mode:
                     if event.state == -1: # LEFT ARROW
                         mouse.press(button='left')
+                        self.is_pressed['LEFT'] = (True, now())
                     elif event.state == 1: # RIGHT ARROW
                         mouse.press(button='right')
+                        self.is_pressed['RIGHT'] = (True, now())
+                        pass
                     else:
-                        if mouse.is_pressed(button='left'):
-                            mouse.release(button='left')
-                        if mouse.is_pressed(button='right'):
-                            mouse.release(button='right')
+                        self.is_pressed['LEFT'] = (False, None)
+                        self.is_pressed['RIGHT'] = (False, None)
+                        self.release_mouse_if_pressed('left')
+                        self.release_mouse_if_pressed('right')
 
                 # Mouse movement
                 elif event.code == 'ABS_RY' and self.is_mouse_mode:
@@ -303,6 +395,11 @@ class myApp(App):
         self.init_secondary_update_thread()
 
         return root_widget
+
+    def init_input_held_buttons_handling(self):
+        thread = threading.Thread(target=self.handle_held_button_repetition, args=())
+        thread.daemon = True
+        thread.start()
 
     def init_input_listening_thread(self):
         self._monitor_thread = threading.Thread(target=self.input_loop, args=())
