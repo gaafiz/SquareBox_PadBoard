@@ -43,6 +43,9 @@ class myApp(App):
     MouseYPosVelocity = 0
     MouseXPosVelocity = 0
 
+    # Special key
+    is_L1_pressed = False
+
     def on_start(self, *args):
         window_util.set_always_upront(app_config.title)
         window_util.set_transparency(app_config.title, app_config.transparency_level)
@@ -68,7 +71,7 @@ class myApp(App):
         ANALOG_STICK_DEADZONE_THRESHOLD = 0.33
         ANALOG_STICK_DEADZONE_FOR_MOUSE = 0.12
         TRIGGER_DEADZONE_THRESHOLD = 10
-        MOVING_VELOCITY_CONSTANT = 15
+        MOVING_VELOCITY_CONSTANT = 15 * 3
         MOVING_MOUSE_VELOCITY_CONSTANT = 8
 
         y_axis = 'CENTER'
@@ -76,7 +79,6 @@ class myApp(App):
 
         is_L2_pressed = False
         is_R2_pressed = False
-        is_L1_pressed = False
         is_START_pressed = False
         is_SELECT_pressed = False
 
@@ -91,10 +93,10 @@ class myApp(App):
                 if event.code == 'BTN_TL':
                     if event.state == 0:
                         self.current_padboard_grill = tiles[self.current_padboard_tile].foreground_grill
-                        is_L1_pressed = False
+                        self.is_L1_pressed = False
                     else:
                         self.current_padboard_grill = tiles[self.current_padboard_tile].background_grill
-                        is_L1_pressed = True
+                        self.is_L1_pressed = True
 
                 # Handle Window Hide/show
                 elif event.code == 'BTN_START':
@@ -102,7 +104,7 @@ class myApp(App):
                         is_START_pressed = False
                     else:
                         is_START_pressed = True
-                        if is_L1_pressed and is_SELECT_pressed:
+                        if self.is_L1_pressed and is_SELECT_pressed:
                             self.is_in_pause = not self.is_in_pause
 
                 elif event.code == 'BTN_SELECT':
@@ -110,7 +112,7 @@ class myApp(App):
                         is_SELECT_pressed = False
                     else:
                         is_SELECT_pressed = True
-                        if is_L1_pressed and is_START_pressed:
+                        if self.is_L1_pressed and is_START_pressed:
                             self.is_in_pause = not self.is_in_pause
                 elif self.is_in_pause:
                     continue
@@ -251,14 +253,14 @@ class myApp(App):
 
                 # Mouse movement
                 elif event.code == 'ABS_RY' and self.is_mouse_mode:
-                    moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT if not is_L1_pressed else MOVING_MOUSE_VELOCITY_CONSTANT * 3
+                    moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT
                     value = event.state / ANALOG_STICK_MAX_RAW_VALUE
                     if value > ANALOG_STICK_DEADZONE_FOR_MOUSE or value < -ANALOG_STICK_DEADZONE_FOR_MOUSE:
                         self.MouseYPosVelocity = - int(moving_velocity * value)
                     else:
                         self.MouseYPosVelocity = 0
                 elif event.code == 'ABS_RX' and self.is_mouse_mode:
-                    moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT if not is_L1_pressed else MOVING_MOUSE_VELOCITY_CONSTANT * 3
+                    moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT
                     value = event.state / ANALOG_STICK_MAX_RAW_VALUE
                     if value > ANALOG_STICK_DEADZONE_FOR_MOUSE or value < -ANALOG_STICK_DEADZONE_FOR_MOUSE:
                         self.MouseXPosVelocity = int(moving_velocity * value)
@@ -267,9 +269,26 @@ class myApp(App):
 
 
     def update_secondary_values(self):
+        """
+            Handles all the non-critical periodical updates that can be executed outside of the main thread
+        """
+
         while True:
             if self.MouseYPosVelocity != 0 or self.MouseXPosVelocity !=0:
-                mouse.move(self.MouseXPosVelocity, self.MouseYPosVelocity, absolute=False)
+                if self.is_L1_pressed:
+                    mouse.move(self.MouseXPosVelocity * 3, self.MouseYPosVelocity * 3, absolute=False)
+                else:
+                    mouse.move(self.MouseXPosVelocity, self.MouseYPosVelocity, absolute=False)
+
+            # Window moving logic
+            if self.WindowYPosVelocity != 0 or self.WindowXPosVelocity != 0:
+                window_util.move_window(
+                    self.title,
+                    self.WindowXPosVelocity,
+                    self.WindowYPosVelocity,
+                    relative_cordinates = True
+                )
+
             time.sleep(0.01)
         pass
 
@@ -279,7 +298,7 @@ class myApp(App):
         self.active_box = 4
 
         # Start rendering and input listening loops
-        Clock.schedule_interval(self.update_window, 0.01)
+        Clock.schedule_interval(self.main_thread_updates, 0.04)
         self.init_input_listening_thread()
         self.init_secondary_update_thread()
 
@@ -295,7 +314,7 @@ class myApp(App):
         self._secomdary_update_thread.daemon = True
         self._secomdary_update_thread.start()
 
-    def update_window(self, dt):
+    def main_thread_updates(self, dt):
         """
             This method updates some graphic properties of the windows.
             I could set this changes using bindings but some windows
@@ -304,11 +323,12 @@ class myApp(App):
             are collected within this method
         """
 
+        # Replaced with the window_util.move_window method because faster and less cpu consuming
         # Window moving logic
-        if self.WindowYPosVelocity != 0:
-            Window.top += self.WindowYPosVelocity
-        if self.WindowXPosVelocity != 0:
-            Window.left += self.WindowXPosVelocity
+        # if self.WindowYPosVelocity != 0:
+        #     Window.top += self.WindowYPosVelocity
+        # if self.WindowXPosVelocity != 0:
+        #     Window.left += self.WindowXPosVelocity
 
         # Window hiding/showing logic
         if self.is_in_pause != self.is_hide:
