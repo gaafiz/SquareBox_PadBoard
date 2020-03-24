@@ -24,6 +24,7 @@ import gamepad_high_cpu_usage_patch
 import system_window_util as window_util
 import squarebox_gamepad_config as app_config
 from widget import ActionsGridLayout
+from actions import get_actions_by_name
 
 tiles = app_config.tiles
 
@@ -36,7 +37,7 @@ class myApp(App):
 
     # In seconds
     hold_button_delay = 0.4
-    rapid_fired_frequency = 0.05
+    rapid_fired_frequency = 0.035
 
     # What is active on the padboard
     current_padboard_tile = 0
@@ -57,10 +58,10 @@ class myApp(App):
         'LEFT': (False, None),
         'RIGHT': (False, None),
 
-        # 'BTN_NORTH': False,
-        # 'BTN_SOUTH': False,
-        # 'BTN_EAST': False,
-        # 'BTN_WEST': False,
+        'BTN_NORTH': (False, None, 0),
+        'BTN_SOUTH': (False, None, 0),
+        'BTN_EAST': (False, None, 0),
+        'BTN_WEST': (False, None, 0),
     }
 
     def on_start(self, *args):
@@ -74,14 +75,16 @@ class myApp(App):
         else:
             if event.state == 1:
                 action = self.current_padboard_grill[self.active_box][action_idx]
-                if action == 'del':
-                    keyboard.press_and_release('backspace')
-                elif action == 'space':
-                    keyboard.press_and_release('space')
-                elif action == 'enter':
-                    keyboard.press_and_release('enter')
-                else:
-                    keyboard.write(action)
+                p, h, r = get_actions_by_name(action)
+                p()
+                self.is_pressed[btn] = (True, now(), self.active_box)
+            else:
+                self.is_pressed[btn] = (False, None, 0)
+                action_name = self.current_padboard_grill[self.is_pressed[btn][2]][action_idx]
+                p, h, r = get_actions_by_name(action_name)
+                r()
+
+
 
     def release_key_if_pressed(self, key):
         if keyboard.is_pressed(key):
@@ -111,10 +114,21 @@ class myApp(App):
             on_release = lambda: None if self.is_mouse_mode else self.release_key_if_pressed('down')
             self.held_button_action(tick_time, "DOWN", on_hold, on_release)
 
+            def get_current_action(btn, action_idx):
+                action_name = self.current_padboard_grill[self.is_pressed[btn][2]][action_idx]
+                return get_actions_by_name(action_name)
+
+            for btn, action_idx in [('BTN_NORTH', 0), ('BTN_WEST', 1), ('BTN_EAST', 2), ('BTN_SOUTH', 3)]:
+                on_hold = lambda : get_current_action(btn, action_idx)[1]()
+                on_release = lambda : get_current_action(btn, action_idx)[2]()
+                self.held_button_action(tick_time, btn, on_hold, on_release)
+
             time.sleep(self.rapid_fired_frequency)
 
     def held_button_action(self, tick_time, code, on_hold, on_release):
-        pressed, pressed_time = self.is_pressed[code]
+        is_pressed = self.is_pressed[code]
+        pressed = is_pressed[0]
+        pressed_time = is_pressed[1]
         if pressed:
             if (tick_time - pressed_time) > self.hold_button_delay:
                 on_hold()
