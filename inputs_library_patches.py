@@ -62,13 +62,15 @@ class SleepingGamePad(GamePad):
         events = [self._make_event(*event) for event in evdev_objects]
         return events
 
+    # TODO: Override and edit this method to flush the input buffer/pipe
+    #       when a controller is detected as "disconnected"
     # def __iter__(self):
     #     while True:
-    #         event = self._do_iter()
-    #         if not event and WIN:
+    #         if WIN:
     #             self._GamePad__check_state()
+    #         event = self._do_iter()
     #         if event:
-    #             yield event
+    #                 yield event
 
     # Set listener as non-daemon to facilitate plug-and-play feature
     @property
