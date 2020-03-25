@@ -161,214 +161,219 @@ class myApp(App):
             self.release_mouse_if_pressed('left')
             self.release_mouse_if_pressed('right')
 
+        inputs_library_patches.waitng_for_controller()
         self.init_input_held_buttons_handling()
 
         while True:
-            events = get_gamepad()
-            for event in events:
+            try:
+                events = get_gamepad()
+                for event in events:
 
-                # Change Tile grid
-                if event.code == 'BTN_TL':
-                    if event.state == 0:
-                        self.current_padboard_grill = tiles[self.current_padboard_tile].foreground_grill
-                        self.is_L1_pressed = False
-                    else:
-                        self.current_padboard_grill = tiles[self.current_padboard_tile].background_grill
-                        self.is_L1_pressed = True
-
-                # Handle Window Hide/show
-                elif event.code == 'BTN_START':
-                    if event.state == 0:
-                        is_START_pressed = False
-                    else:
-                        is_START_pressed = True
-                        if self.is_L1_pressed and is_SELECT_pressed:
-                            self.is_in_pause = not self.is_in_pause
-
-                elif event.code == 'BTN_SELECT':
-                    if event.state == 0:
-                        is_SELECT_pressed = False
-                    else:
-                        is_SELECT_pressed = True
-                        if self.is_L1_pressed and is_START_pressed:
-                            self.is_in_pause = not self.is_in_pause
-                elif self.is_in_pause:
-                    continue
-
-                # Handle ALT, CTRL, SHIFT
-                elif event.code == 'ABS_Z':
-                    if not ((event.state > TRIGGER_DEADZONE_THRESHOLD) == is_L2_pressed):
-                        is_L2_pressed = not is_L2_pressed
-                        if is_L2_pressed:
-                            keyboard.press("alt")
+                    # Change Tile grid
+                    if event.code == 'BTN_TL':
+                        if event.state == 0:
+                            self.current_padboard_grill = tiles[self.current_padboard_tile].foreground_grill
+                            self.is_L1_pressed = False
                         else:
-                            keyboard.release("alt")
+                            self.current_padboard_grill = tiles[self.current_padboard_tile].background_grill
+                            self.is_L1_pressed = True
 
-                elif event.code == 'ABS_RZ':
-                    if not ((event.state > TRIGGER_DEADZONE_THRESHOLD) == is_R2_pressed):
-                        is_R2_pressed = not is_R2_pressed
-                        if is_R2_pressed:
-                            keyboard.press("ctrl")
+                    # Handle Window Hide/show
+                    elif event.code == 'BTN_START':
+                        if event.state == 0:
+                            is_START_pressed = False
                         else:
-                            keyboard.release("ctrl")
+                            is_START_pressed = True
+                            if self.is_L1_pressed and is_SELECT_pressed:
+                                self.is_in_pause = not self.is_in_pause
 
-                elif event.code == 'BTN_TR':
-                    if event.state == 0:
-                        keyboard.release("shift")
-                    else:
-                        keyboard.press("shift")
-
-                # Handle Actions
-                elif self.handle_action_input(event, 'BTN_NORTH', 0):
-                    pass
-                elif self.handle_action_input(event, 'BTN_WEST', 1):
-                    pass
-                elif self.handle_action_input(event, 'BTN_EAST', 2):
-                    pass
-                elif self.handle_action_input(event, 'BTN_SOUTH', 3):
-                    pass
-
-                # Handle Active Boxes
-                elif event.code == 'ABS_Y' or event.code == 'ABS_X':
-                    if event.code == 'ABS_Y':
-                        y_val = event.state / ANALOG_STICK_MAX_RAW_VALUE
-                        if y_val > ANALOG_STICK_DEADZONE_THRESHOLD:
-                            y_axis = 'TOP'
-                        elif y_val < -ANALOG_STICK_DEADZONE_THRESHOLD:
-                            y_axis = 'BOTTOM'
+                    elif event.code == 'BTN_SELECT':
+                        if event.state == 0:
+                            is_SELECT_pressed = False
                         else:
-                            y_axis = 'CENTER'
+                            is_SELECT_pressed = True
+                            if self.is_L1_pressed and is_START_pressed:
+                                self.is_in_pause = not self.is_in_pause
+                    elif self.is_in_pause:
+                        continue
 
-                    elif event.code == 'ABS_X':
-                        x_val = event.state / ANALOG_STICK_MAX_RAW_VALUE
-                        if x_val > ANALOG_STICK_DEADZONE_THRESHOLD:
-                            x_axis = 'RIGHT'
-                        elif x_val < -ANALOG_STICK_DEADZONE_THRESHOLD:
-                            x_axis = 'LEFT'
+                    # Handle ALT, CTRL, SHIFT
+                    elif event.code == 'ABS_Z':
+                        if not ((event.state > TRIGGER_DEADZONE_THRESHOLD) == is_L2_pressed):
+                            is_L2_pressed = not is_L2_pressed
+                            if is_L2_pressed:
+                                keyboard.press("alt")
+                            else:
+                                keyboard.release("alt")
+
+                    elif event.code == 'ABS_RZ':
+                        if not ((event.state > TRIGGER_DEADZONE_THRESHOLD) == is_R2_pressed):
+                            is_R2_pressed = not is_R2_pressed
+                            if is_R2_pressed:
+                                keyboard.press("ctrl")
+                            else:
+                                keyboard.release("ctrl")
+
+                    elif event.code == 'BTN_TR':
+                        if event.state == 0:
+                            keyboard.release("shift")
                         else:
-                            x_axis = 'CENTER'
+                            keyboard.press("shift")
 
-                    if y_axis == 'TOP':
-                        if x_axis == 'LEFT':
-                            self.active_box = 0
-                        elif x_axis == 'RIGHT':
-                            self.active_box = 2
-                        else:
-                            self.active_box = 1
-                    elif y_axis == 'BOTTOM':
-                        if x_axis == 'LEFT':
-                            self.active_box = 6
-                        elif x_axis == 'RIGHT':
-                            self.active_box = 8
-                        else:
-                            self.active_box = 7
-                    else:
-                        if x_axis == 'LEFT':
-                            self.active_box = 3
-                        elif x_axis == 'RIGHT':
-                            self.active_box = 5
-                        else:
-                            self.active_box = 4
-
-                # Handle window moving
-                elif event.code == 'ABS_RY' and not self.is_mouse_mode:
-                    value = event.state / ANALOG_STICK_MAX_RAW_VALUE
-                    if value > ANALOG_STICK_DEADZONE_THRESHOLD or value < -ANALOG_STICK_DEADZONE_THRESHOLD:
-                        self.WindowYPosVelocity = - int(MOVING_VELOCITY_CONSTANT * value)
-                    else:
-                        self.WindowYPosVelocity = 0
-                elif event.code == 'ABS_RX' and not self.is_mouse_mode:
-                    value = event.state / ANALOG_STICK_MAX_RAW_VALUE
-                    if value > ANALOG_STICK_DEADZONE_THRESHOLD or value < -ANALOG_STICK_DEADZONE_THRESHOLD:
-                        self.WindowXPosVelocity = int(MOVING_VELOCITY_CONSTANT * value)
-                    else:
-                        self.WindowXPosVelocity = 0
-
-                # Handle Tile Changing
-                elif event.code == 'BTN_THUMBL':
-                    if event.state == 1:
-                        self.current_padboard_tile = (self.current_padboard_tile + 1) % len(tiles)
-                        self.current_padboard_grill = tiles[self.current_padboard_tile].foreground_grill
-
-                # Handle Arrows
-                elif event.code == 'ABS_HAT0Y' and not self.is_mouse_mode:
-                    if event.state == 1: # DOWN ARROW
-                        keyboard.press("down")
-                        self.is_pressed['DOWN'] = (True, now())
-                    elif event.state == -1: # UP ARROW
-                        keyboard.press("up")
-                        self.is_pressed['UP'] = (True, now())
-                    else:
-                        self.is_pressed['UP']= (False, None)
-                        self.is_pressed['DOWN']= (False, None)
-                        self.release_key_if_pressed('up')
-                        self.release_key_if_pressed('down')
-
-                elif event.code == 'ABS_HAT0X' and not self.is_mouse_mode:
-                    if event.state == -1: # LEFT ARROW
-                        keyboard.press("left")
-                        self.is_pressed['LEFT'] = (True, now())
-                    elif event.state == 1: # RIGHT ARROW
-                        keyboard.press("right")
-                        self.is_pressed['RIGHT'] = (True, now())
+                    # Handle Actions
+                    elif self.handle_action_input(event, 'BTN_NORTH', 0):
                         pass
-                    else:
-                        self.is_pressed['LEFT']= (False, None)
-                        self.is_pressed['RIGHT']= (False, None)
-                        self.release_key_if_pressed('left')
-                        self.release_key_if_pressed('right')
-
-                # Handle Mouse mode
-                elif event.code == 'BTN_THUMBR':
-                    if event.state == 1:
-                        reset_mouse_mode_sensitive_buttons()
-
-                        self.is_mouse_mode = not self.is_mouse_mode
-                        if self.is_mouse_mode:
-                            print("MOUSE MODE ON")
-                        else:
-                            print("MOUSE MODE OFF")
-
-                # Mouse Buttons
-                elif event.code == 'ABS_HAT0Y' and self.is_mouse_mode:
-                    if event.state == 1: # DOWN ARROW
-                       mouse.wheel(delta=-1)
-                       self.is_pressed['DOWN'] = (True, now())
-                    elif event.state == -1: # UP ARROW
-                        mouse.wheel(delta=1)
-                        self.is_pressed['UP'] = (True, now())
-                    else:
-                        self.is_pressed['UP']= (False, None)
-                        self.is_pressed['DOWN']= (False, None)
-                elif event.code == 'ABS_HAT0X' and self.is_mouse_mode:
-                    if event.state == -1: # LEFT ARROW
-                        mouse.press(button='left')
-                        self.is_pressed['LEFT'] = (True, now())
-                    elif event.state == 1: # RIGHT ARROW
-                        mouse.press(button='right')
-                        self.is_pressed['RIGHT'] = (True, now())
+                    elif self.handle_action_input(event, 'BTN_WEST', 1):
                         pass
-                    else:
-                        self.is_pressed['LEFT'] = (False, None)
-                        self.is_pressed['RIGHT'] = (False, None)
-                        self.release_mouse_if_pressed('left')
-                        self.release_mouse_if_pressed('right')
+                    elif self.handle_action_input(event, 'BTN_EAST', 2):
+                        pass
+                    elif self.handle_action_input(event, 'BTN_SOUTH', 3):
+                        pass
 
-                # Mouse movement
-                elif event.code == 'ABS_RY' and self.is_mouse_mode:
-                    moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT
-                    value = event.state / ANALOG_STICK_MAX_RAW_VALUE
-                    if value > ANALOG_STICK_DEADZONE_FOR_MOUSE or value < -ANALOG_STICK_DEADZONE_FOR_MOUSE:
-                        self.MouseYPosVelocity = - int(moving_velocity * value)
-                    else:
-                        self.MouseYPosVelocity = 0
-                elif event.code == 'ABS_RX' and self.is_mouse_mode:
-                    moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT
-                    value = event.state / ANALOG_STICK_MAX_RAW_VALUE
-                    if value > ANALOG_STICK_DEADZONE_FOR_MOUSE or value < -ANALOG_STICK_DEADZONE_FOR_MOUSE:
-                        self.MouseXPosVelocity = int(moving_velocity * value)
-                    else:
-                        self.MouseXPosVelocity = 0
+                    # Handle Active Boxes
+                    elif event.code == 'ABS_Y' or event.code == 'ABS_X':
+                        if event.code == 'ABS_Y':
+                            y_val = event.state / ANALOG_STICK_MAX_RAW_VALUE
+                            if y_val > ANALOG_STICK_DEADZONE_THRESHOLD:
+                                y_axis = 'TOP'
+                            elif y_val < -ANALOG_STICK_DEADZONE_THRESHOLD:
+                                y_axis = 'BOTTOM'
+                            else:
+                                y_axis = 'CENTER'
+
+                        elif event.code == 'ABS_X':
+                            x_val = event.state / ANALOG_STICK_MAX_RAW_VALUE
+                            if x_val > ANALOG_STICK_DEADZONE_THRESHOLD:
+                                x_axis = 'RIGHT'
+                            elif x_val < -ANALOG_STICK_DEADZONE_THRESHOLD:
+                                x_axis = 'LEFT'
+                            else:
+                                x_axis = 'CENTER'
+
+                        if y_axis == 'TOP':
+                            if x_axis == 'LEFT':
+                                self.active_box = 0
+                            elif x_axis == 'RIGHT':
+                                self.active_box = 2
+                            else:
+                                self.active_box = 1
+                        elif y_axis == 'BOTTOM':
+                            if x_axis == 'LEFT':
+                                self.active_box = 6
+                            elif x_axis == 'RIGHT':
+                                self.active_box = 8
+                            else:
+                                self.active_box = 7
+                        else:
+                            if x_axis == 'LEFT':
+                                self.active_box = 3
+                            elif x_axis == 'RIGHT':
+                                self.active_box = 5
+                            else:
+                                self.active_box = 4
+
+                    # Handle window moving
+                    elif event.code == 'ABS_RY' and not self.is_mouse_mode:
+                        value = event.state / ANALOG_STICK_MAX_RAW_VALUE
+                        if value > ANALOG_STICK_DEADZONE_THRESHOLD or value < -ANALOG_STICK_DEADZONE_THRESHOLD:
+                            self.WindowYPosVelocity = - int(MOVING_VELOCITY_CONSTANT * value)
+                        else:
+                            self.WindowYPosVelocity = 0
+                    elif event.code == 'ABS_RX' and not self.is_mouse_mode:
+                        value = event.state / ANALOG_STICK_MAX_RAW_VALUE
+                        if value > ANALOG_STICK_DEADZONE_THRESHOLD or value < -ANALOG_STICK_DEADZONE_THRESHOLD:
+                            self.WindowXPosVelocity = int(MOVING_VELOCITY_CONSTANT * value)
+                        else:
+                            self.WindowXPosVelocity = 0
+
+                    # Handle Tile Changing
+                    elif event.code == 'BTN_THUMBL':
+                        if event.state == 1:
+                            self.current_padboard_tile = (self.current_padboard_tile + 1) % len(tiles)
+                            self.current_padboard_grill = tiles[self.current_padboard_tile].foreground_grill
+
+                    # Handle Arrows
+                    elif event.code == 'ABS_HAT0Y' and not self.is_mouse_mode:
+                        if event.state == 1: # DOWN ARROW
+                            keyboard.press("down")
+                            self.is_pressed['DOWN'] = (True, now())
+                        elif event.state == -1: # UP ARROW
+                            keyboard.press("up")
+                            self.is_pressed['UP'] = (True, now())
+                        else:
+                            self.is_pressed['UP']= (False, None)
+                            self.is_pressed['DOWN']= (False, None)
+                            self.release_key_if_pressed('up')
+                            self.release_key_if_pressed('down')
+
+                    elif event.code == 'ABS_HAT0X' and not self.is_mouse_mode:
+                        if event.state == -1: # LEFT ARROW
+                            keyboard.press("left")
+                            self.is_pressed['LEFT'] = (True, now())
+                        elif event.state == 1: # RIGHT ARROW
+                            keyboard.press("right")
+                            self.is_pressed['RIGHT'] = (True, now())
+                            pass
+                        else:
+                            self.is_pressed['LEFT']= (False, None)
+                            self.is_pressed['RIGHT']= (False, None)
+                            self.release_key_if_pressed('left')
+                            self.release_key_if_pressed('right')
+
+                    # Handle Mouse mode
+                    elif event.code == 'BTN_THUMBR':
+                        if event.state == 1:
+                            reset_mouse_mode_sensitive_buttons()
+
+                            self.is_mouse_mode = not self.is_mouse_mode
+                            if self.is_mouse_mode:
+                                print("MOUSE MODE ON")
+                            else:
+                                print("MOUSE MODE OFF")
+
+                    # Mouse Buttons
+                    elif event.code == 'ABS_HAT0Y' and self.is_mouse_mode:
+                        if event.state == 1: # DOWN ARROW
+                           mouse.wheel(delta=-1)
+                           self.is_pressed['DOWN'] = (True, now())
+                        elif event.state == -1: # UP ARROW
+                            mouse.wheel(delta=1)
+                            self.is_pressed['UP'] = (True, now())
+                        else:
+                            self.is_pressed['UP']= (False, None)
+                            self.is_pressed['DOWN']= (False, None)
+                    elif event.code == 'ABS_HAT0X' and self.is_mouse_mode:
+                        if event.state == -1: # LEFT ARROW
+                            mouse.press(button='left')
+                            self.is_pressed['LEFT'] = (True, now())
+                        elif event.state == 1: # RIGHT ARROW
+                            mouse.press(button='right')
+                            self.is_pressed['RIGHT'] = (True, now())
+                            pass
+                        else:
+                            self.is_pressed['LEFT'] = (False, None)
+                            self.is_pressed['RIGHT'] = (False, None)
+                            self.release_mouse_if_pressed('left')
+                            self.release_mouse_if_pressed('right')
+
+                    # Mouse movement
+                    elif event.code == 'ABS_RY' and self.is_mouse_mode:
+                        moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT
+                        value = event.state / ANALOG_STICK_MAX_RAW_VALUE
+                        if value > ANALOG_STICK_DEADZONE_FOR_MOUSE or value < -ANALOG_STICK_DEADZONE_FOR_MOUSE:
+                            self.MouseYPosVelocity = - int(moving_velocity * value)
+                        else:
+                            self.MouseYPosVelocity = 0
+                    elif event.code == 'ABS_RX' and self.is_mouse_mode:
+                        moving_velocity = MOVING_MOUSE_VELOCITY_CONSTANT
+                        value = event.state / ANALOG_STICK_MAX_RAW_VALUE
+                        if value > ANALOG_STICK_DEADZONE_FOR_MOUSE or value < -ANALOG_STICK_DEADZONE_FOR_MOUSE:
+                            self.MouseXPosVelocity = int(moving_velocity * value)
+                        else:
+                            self.MouseXPosVelocity = 0
+            except:
+                print("Controller Disconnected")
+                time.sleep(1)
 
 
     def update_secondary_values(self):

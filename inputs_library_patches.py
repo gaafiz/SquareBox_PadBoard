@@ -1,12 +1,15 @@
 import time
+from multiprocessing import Process, Pipe
 
 import inputs
 from inputs import GamePad, DeviceManager
-from inputs import iter_unpack, EVENT_TYPES
+from inputs import iter_unpack, EVENT_TYPES, WIN
 
 
 # This patch fix the following inputs library issues:
 #   - Fetching game_pad events causes Severe CPU usage
+#   - Plug and Play not possible because self._GamePad__check_state()
+#     doesn't trigger the disconnected error in the right thread
 #   - BTN_START and BTN_SELECT buttons are switched
 #   - Initialize an instance of DeviceManager outside of the inputs.py file,
 #     causes DeviceManager().codes['type_codes'] to be empty
@@ -59,4 +62,40 @@ class SleepingGamePad(GamePad):
         events = [self._make_event(*event) for event in evdev_objects]
         return events
 
+    # def __iter__(self):
+    #     while True:
+    #         event = self._do_iter()
+    #         if not event and WIN:
+    #             self._GamePad__check_state()
+    #         if event:
+    #             yield event
+
+    # Set listener as non-daemon to facilitate plug-and-play feature
+    @property
+    def _pipe(self):
+        """On Windows we use a pipe to emulate a Linux style character
+        buffer."""
+        if self._evdev:
+            return None
+        if not self.__pipe:
+            target_function = self._get_target_function()
+            if not target_function:
+                return None
+
+            self.__pipe, child_conn = Pipe(duplex=False)
+            self._listener = Process(target=target_function,
+                                     args=(child_conn,))
+            self._listener.start()
+        return self.__pipe
+
 inputs.devices = FixedDeviceManager()
+
+def waitng_for_controller(controller_idx=0):
+    while True:
+        try:
+            inputs.devices = FixedDeviceManager()
+            inputs.devices.gamepads[0].read()
+            return
+        except:
+            time.sleep(3)
+            pass
