@@ -1,4 +1,4 @@
-from inputs import devices
+import inputs
 from inputs import get_gamepad
 import keyboard
 
@@ -7,17 +7,16 @@ current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfra
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-import gamepad_high_cpu_usage_patch
+import inputs_library_patches
 
 if __name__== "__main__":
     print('\nGamepads:')
-    for device in devices.gamepads:
+    for device in inputs.devices.gamepads:
         print(device)
-
-    is_shift = False
 
     print('\nEvents')
     while 1:
-        events = get_gamepad()
+        # events = get_gamepad()
+        events = inputs.devices.gamepads[0].read()
         for event in events:
-            print(str(event.code) + ' - ' + str(event.state))
+            print(str(event.code) + ' - ' + str(event.state) + " - " + str(event.ev_type))

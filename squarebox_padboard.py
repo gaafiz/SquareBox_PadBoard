@@ -5,14 +5,11 @@ from time import time as now
 import threading
 
 # Kivy
-import kivy
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
-from kivy.properties import ListProperty
-from kivy.properties import NumericProperty
-
+from kivy.properties import ListProperty, NumericProperty
 
 # Input libraries
 import keyboard
@@ -20,7 +17,7 @@ import mouse
 from inputs import get_gamepad
 
 # custom libs
-import gamepad_high_cpu_usage_patch
+import inputs_library_patches
 import system_window_util as window_util
 import squarebox_gamepad_config as app_config
 from widget import ActionsGridLayout
