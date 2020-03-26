@@ -19,7 +19,7 @@ from inputs import get_gamepad
 # custom libs
 import inputs_library_patches
 import system_window_util as window_util
-import squarebox_gamepad_config as app_config
+import squarebox_padboard_config as app_config
 from widget import ActionsGridLayout
 from actions import get_actions_by_name
 

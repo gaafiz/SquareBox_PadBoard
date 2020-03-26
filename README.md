@@ -1,10 +1,10 @@
 # SquareBox the PadBoard
 
-SquareBox the PadBoard gets you **full controll of your PC using only a Gamepad**!
-It allows you to **use keyboard hotkeys, write text and controll the mouse with your Gamepad Controller** right there in your hands.
+SquareBox the PadBoard gets you **full control of your PC using only a Gamepad**!
+It allows you to **use keyboard hotkeys, write text and control the mouse with your Gamepad Controller** right there in your hands.
 
 - Are you tring or thinking about building a pc to use as console or emulation station in your living room?
-- Were you connecting your laptop to the TV, getting ready for watching a movie, when you realized you had no easy way to controll your favorite media confortably from your bed?
+- Were you connecting your laptop to the TV, getting ready for watching a movie, when you realized you had no easy way to control your favorite media confortably from your bed?
 - Are you playing your favorite game with your PS4 Controller and you need to write a quick message to your team buddy?
 
 If the answer to at least one of these question is yes, then a small bluetooth touchpad + keyboard may solve your problems.
@@ -13,12 +13,10 @@ But, if your are ~~broke~~ lazy to buy it, good news! you can still solve your p
 > **INFO**: Squarebox the Padboard is inspired by the PSP **Danzeff OSK** popular in the Homebrew scene of the (g)old times of PSP. Google it for reviving good memories.
 
 
-
-
 ## How to get SquareBox
 
 > **DISCLAIMER**:
-> At the moment, Squarebox **supports only Windows** and if 2 or more gamepads are connected, the first one will controll the PadBoard.
+> At the moment, Squarebox **supports only Windows** and if 2 or more gamepads are connected, the first one will control the PadBoard.
 > **Supported controllers**: Xbox 360, Xbox One, PS4 (if you install [DS4Windows](http://ds4windows.com/) driver)
 
 You can download the last version of the Windows executable (.exe) [HERE](https://github.com/giulianfazio/SquareBox_PadBoard/blob/master/dist/squarebox_padboard.exe?raw=true).
@@ -31,7 +29,7 @@ Alternatively, if you don't trust the executable, you can easily build it yourse
 
 ## Main features
 
-- **Controll the keyboard** (press hotkeys, keys combinations and write text) with a combination of Analog stick + 4 main action buttons.
+- **Control the keyboard** (press hotkeys, keys combinations and write text) with a combination of Analog stick + 4 main action buttons.
 - **Control the mouse** with a combination of Analog stick + Arrow buttons.
 - **Support rapid-fire**: if you keep a button pressed, it will repeat the expected action until the button is released
 - **Gamepad Plug and Play**: the app instantly works everytime you connect your Gamepad (most important doesn't crash when you disconnect the Gamepad :D)
@@ -62,7 +60,6 @@ When the **Mouse mode** is active, this alternative combos are active:
 
 ## To implement
 
-* (Major) Define default Keyboard Layout
 * Configuration File (at least: custom keyboard sizes and custom keyboard layouts)
 * Start on-Windows-startup option
 * Make the keyboard moving only within the display boundaries
