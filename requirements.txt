@@ -1,17 +1,21 @@
-# conda install kivy -c conda-forge
+# Windows lib
+pip install pywin32
 
+# Grapich Lib - Kivy
 python -m pip install docutils pygments pypiwin32 kivy_deps.sdl2==0.1.* kivy_deps.glew==0.1.*
 python -m pip install kivy_deps.gstreamer==0.1.*
 python -m pip install kivy==1.11.1
 
+# Kivy add-on
 python -m pip install KivyOnTop
-#pip install win32gui
-pip install pywin32
 
+# Inputs handling libs
 pip install inputs
 pip install keyboard
 pip install mouse
 
+# This specific setuptools version fix some issues with the input libraries and python 3.6/3.7
 pip install --upgrade setuptools==44.0.0
 
-# USE http://ds4windows.com/ for ds4 compatibility
+# pyinstaller takes care of building up the application executable
+pip install pyinstaller
