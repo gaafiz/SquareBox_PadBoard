@@ -3,7 +3,7 @@
 SquareBox the PadBoard gets you **full control of your PC using only a Gamepad**!
 It allows you to **use keyboard hotkeys, write text and control the mouse with your Gamepad Controller** right there in your hands.
 
-- Are you tring or thinking about building a pc to use as console or emulation station in your living room?
+- Are you trying or thinking about building a pc to use as console or emulation station in your living room?
 - Were you connecting your laptop to the TV, getting ready for watching a movie, when you realized you had no easy way to control your favorite media confortably from your bed?
 - Are you playing your favorite game with your PS4 Controller and you need to write a quick message to your team buddy?
 
@@ -32,7 +32,7 @@ Alternatively, if you don't trust the executable, you can easily build it yourse
 - **Control the keyboard** (press hotkeys, keys combinations and write text) with a combination of Analog stick + 4 main action buttons.
 - **Control the mouse** with a combination of Analog stick + Arrow buttons.
 - **Support rapid-fire**: if you keep a button pressed, it will repeat the expected action until the button is released
-- **Gamepad Plug and Play**: the app instantly works everytime you connect your Gamepad (most important doesn't crash when you disconnect the Gamepad :D)
+- **Gamepad Plug and Play**: the app instantly works everytime you connect your Gamepad (most importantly it doesn't crash when you disconnect the Gamepad :D)
 
 
 ## Gamepad mappings
@@ -71,7 +71,7 @@ When the **Mouse mode** is active, this alternative combos are active:
 * SquareBox cannot suppress Gamepad events. So, if another app (like steam) is using controller inputs, they will be both "doing stugg" reacting to the same controller inputs
 * Spike in CPU usage when the keyboard windows is moving for > 20 secs. It shouldn't happen in normal usage as it mostrly happen when the R-Stick movements are spammed for long time (> 20 secs)
 * Keyboard may appear too big on small screen or too small on big screens (will be solved by the "custom keyboard size" option)`
-* Squarebox executable has a big size considering to the code used. This is likely due to the size oflibraries imported used in the code. It's not a critical point at the moment as it is still a manageable 18MB-ish executable. But is something to have a look at.
+* Squarebox executable has a big size considering to the code used. This is likely due to the size of libraries imported used in the code. It's not a critical point at the moment as it is still a manageable 18MB-ish executable. But is something to have a look at.
 
 
 
