@@ -10,7 +10,21 @@ It allows you to **use keyboard hotkeys, write text and control the mouse with y
 If the answer to at least one of these question is yes, then a small bluetooth touchpad + keyboard may solve your problems.
 But, if your are ~~broke~~ lazy to buy it, good news! you can still solve your problems with SquareBox and your favourite Gamepad.
 
-> **INFO**: Squarebox the Padboard is inspired by the PSP **Danzeff OSK** popular in the Homebrew scene of the (g)old times of PSP. Google it for reviving good memories.
+> **INFO**: SquareBox the Padboard is inspired by the PSP **Danzeff OSK** popular in the Homebrew scene of the (g)old times of PSP. Google it for reviving good memories.
+
+
+## Main features
+
+- **Control the keyboard** (press hotkeys, keys combinations and write text) with a combination of Analog stick + 4 main action buttons.
+- **Control the mouse** with a combination of Analog stick + Arrow buttons.
+- **Support rapid-fire**: if you keep a button pressed, it will repeat the expected action until the button is released
+- **Gamepad Plug and Play**: the app instantly works everytime you connect your Gamepad (most important doesn't crash when you disconnect the Gamepad :D)
+
+
+## SquareBox in action
+
+Example of typing with a Gamepad
+![image](squarebox_in_action.gif)
 
 
 ## How to get SquareBox
@@ -19,20 +33,12 @@ But, if your are ~~broke~~ lazy to buy it, good news! you can still solve your p
 > At the moment, Squarebox **supports only Windows** and if 2 or more gamepads are connected, the first one will control the PadBoard.
 > **Supported controllers**: Xbox 360, Xbox One, PS4 (if you install [DS4Windows](http://ds4windows.com/) driver)
 
-You can download the last version of the Windows executable (.exe) [HERE](https://github.com/giulianfazio/SquareBox_PadBoard/blob/master/dist/squarebox_padboard.exe?raw=true).
+You can download the last version of the Windows executable (.exe) [HERE](dist/squarebox_padboard.exe?raw=true).
 
 Alternatively, if you don't trust the executable, you can easily build it yourself.
 1. Install all necessary python packages listed in [requirementes.txt](/requirements.txt)
 2. Run in the project folder the following command: `pyinstaller -F -w squarebox_padboard.py`
 3. Enjoy your new exe placed in `dist/squarebox_padboard.exe`
-
-
-## Main features
-
-- **Control the keyboard** (press hotkeys, keys combinations and write text) with a combination of Analog stick + 4 main action buttons.
-- **Control the mouse** with a combination of Analog stick + Arrow buttons.
-- **Support rapid-fire**: if you keep a button pressed, it will repeat the expected action until the button is released
-- **Gamepad Plug and Play**: the app instantly works everytime you connect your Gamepad (most importantly it doesn't crash when you disconnect the Gamepad :D)
 
 
 ## Gamepad mappings
@@ -42,7 +48,7 @@ Here you'll find a comprehensive list of all the buttons combos Squarebox the Pa
 * **L1 + START + SELECT**: Hide (and disable) or Show (and re-enable) the PadBoard
 * **D-Pad**: Simulate Keyboard directional arrows.
 * **L-Stick**: Select 1 of the 9 boxes in the current padboard grill
-* **X, Y, A, B (if you are using a Xbox controllerd)**: Press 1 of the 4 letters from the selected box
+* **X, Y, A, B (if you are using a Xbox controlled)**: Press 1 of the 4 letters from the selected box
 * **R-Stick**: Move the padboard on the screen
 * **L1**: When pressed, shows the alternative grill of the current padboard layout.
 * **L2**: Equal to press ALT on a Keyboard
